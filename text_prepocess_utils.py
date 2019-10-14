@@ -31,5 +31,5 @@ def preprocess_text(text):
     #returns a list of terms in the text
     text = remove_punctuation(text)
     terms = tokenize_text(text)
-    terms = stemming(terms)
+    # terms = stemming(terms)
     return terms

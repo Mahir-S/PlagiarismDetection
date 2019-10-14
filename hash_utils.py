@@ -11,8 +11,9 @@ class Permutation_Hash_Generator:
         random.seed(N / 2)
         self.b = [random.randint(1,self.P - 1) for i in range(num_hashes)]
 
+
     def f(self,x,i):
-        return 1 + ((self.a[i] * x  + self.b[i])%self.P)%self.N
+        return ((self.a[i] * x  + self.b[i])%self.P)%self.N
 
 def vector_hash(arr):
     h = 2166136261
