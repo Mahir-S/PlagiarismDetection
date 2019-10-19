@@ -1,4 +1,7 @@
 import random
+import numpy as np
+
+COSINE_HASH_THRESHOLD = 5
 
 class Permutation_Hash_Generator:
     
@@ -22,4 +25,17 @@ def vector_hash(arr):
         t = (h * 6777619) & 4294967295
         h = t ^ arr[i]
     return h
+
+class Cosine_Family:
+    
+    def __init__(self,num_hashes,M = 4):#DO NOT INCREASE M
+        self.M = M
+        self.phg = Permutation_Hash_Generator(M,num_hashes)
+        np.random.seed(M)
+        self.arr = np.random.randint(0,2,M)
+        self.arr = np.where(self.arr == 0, -1, self.arr)
+        self.threshold = COSINE_HASH_THRESHOLD
+    
+    def hash(self,row,index):
+        return self.arr[self.phg.f(row,index)]
 
