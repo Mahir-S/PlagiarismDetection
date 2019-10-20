@@ -40,11 +40,18 @@ class Cosine_Family:
         return self.arr[self.phg.f(row,index)]
 
 class Euclid_Family:
-    def __init__(self, num_hashes, M=4,bin_size = 5):  # DO NOT INCREASE M
+    def __init__(self, num_hashes, M = 4,bin_size = 5):  # DO NOT INCREASE M
         self.cos = Cosine_Family(num_hashes,M)
         self.bin_size = bin_size
 
     def hash(self, row, index):
         return self.cos.hash(row,index)
     
+
+class Hamming_Family:
+    def __init__(self, N, num_hashes, M = 7):
+        self.N = N
+        np.random.seed(N)
+        self.arr = [np.random.randint(0,N,M) for i in range(num_hashes)]
+
 
