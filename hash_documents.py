@@ -1,12 +1,11 @@
 import os
 from generate_shingles import generate_shingles
-from hash_utils import Permutation_Hash_Generator,vector_hash,Cosine_Family,Euclid_Family,Hamming_Family
+from hash_utils import Permutation_Hash_Generator,vector_hash,Cosine_Family,Hamming_Family
 import pickle
 
 NUM_HASHES = 200
 BAND_SIZE = 5
 COSINE_BAND_SIZE = 5
-EUCLID_BAND_SIZE = 3
 HAMMING_BAND_SIZE = 3
 
 shingle_dict = dict()
@@ -108,41 +107,6 @@ def cosine_hash_all_documents(directory,pickle_filename,num_hashes):
     with open('cosinehash_buckets.pickle', 'wb') as handle:
         pickle.dump(cosinehash_buckets, handle)
 
-def euclid_hash_single_document(filepath,num_hashes):
-    shingles = get_shingle_set(filepath)
-    euclid_hasher = Euclid_Family(num_hashes)
-    ans = [0 for i in range(num_hashes)]
-    
-    for shingle in shingles:
-        if shingle not in shingle_dict:
-            continue
-        row = shingle_dict[shingle]
-        for i in range(num_hashes):
-            ans[i] += euclid_hasher.hash(row, i)
-    ans = [ans[i] // euclid_hasher.bin_size for i in range(len(ans))]
-    # print(filepath,ans)
-    return ans
-
-def euclid_hash_all_documents(directory,pickle_filename,num_hashes):
-    generate_map(pickle_filename)
-    euclidhash_buckets = [dict() for i in range((num_hashes + EUCLID_BAND_SIZE - 1) // EUCLID_BAND_SIZE)]
-    
-    for filename in os.listdir(directory):
-        filepath = directory + '/' + filename
-        euclid_hash = euclid_hash_single_document(filepath,num_hashes)
-        
-        for i in range((num_hashes + EUCLID_BAND_SIZE - 1) // EUCLID_BAND_SIZE):
-            
-            arr = euclid_hash[i * EUCLID_BAND_SIZE:(i + 1) * EUCLID_BAND_SIZE]
-            hash_value = vector_hash(arr)
-            if hash_value not in euclidhash_buckets[i]:
-                euclidhash_buckets[i][hash_value]=[filename]
-            else:
-                euclidhash_buckets[i][hash_value].append(filename)
-    
-    with open('euclidhash_buckets.pickle', 'wb') as handle:
-        pickle.dump(euclidhash_buckets, handle)
-
 
 def hamming_hash_single_document(filepath, num_hashes):
     shingles = get_shingle_set(filepath)
@@ -183,9 +147,6 @@ def hash_all_documnents(directory,pickle_filename,distance_type,num_hashes):
 
     if distance_type == 'Cosine':
         cosine_hash_all_documents(directory,pickle_filename,num_hashes)
-
-    if distance_type == 'Euclid':
-        euclid_hash_all_documents(directory,pickle_filename,num_hashes)
 
     if distance_type == 'Hamming':
         hamming_hash_all_documents(directory,pickle_filename,num_hashes)

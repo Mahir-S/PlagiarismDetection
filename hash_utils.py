@@ -39,13 +39,7 @@ class Cosine_Family:
     def hash(self,row,index):
         return self.arr[self.phg.f(row,index)]
 
-class Euclid_Family:
-    def __init__(self, num_hashes, M = 4,bin_size = 5):  # DO NOT INCREASE M
-        self.cos = Cosine_Family(num_hashes,M)
-        self.bin_size = bin_size
 
-    def hash(self, row, index):
-        return self.cos.hash(row,index)
     
 
 class Hamming_Family:

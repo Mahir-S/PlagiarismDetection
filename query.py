@@ -1,8 +1,8 @@
 import os
 from generate_shingles import generate_shingles
 from hash_utils import Permutation_Hash_Generator, vector_hash,COSINE_HASH_THRESHOLD
-from hash_documents import minhash_document,cosine_hash_single_document,shingle_dict,generate_map,euclid_hash_single_document,hamming_hash_single_document
-from hash_documents import BAND_SIZE,COSINE_BAND_SIZE,NUM_HASHES,EUCLID_BAND_SIZE,HAMMING_BAND_SIZE
+from hash_documents import minhash_document,cosine_hash_single_document,shingle_dict,generate_map,hamming_hash_single_document
+from hash_documents import BAND_SIZE,COSINE_BAND_SIZE,NUM_HASHES,HAMMING_BAND_SIZE
 import pickle
 
 def query_all_documents_minhash(directory,shingle_pickle_filename,minhash_buckets_filename,num_hashes):
@@ -62,34 +62,6 @@ def query_all_documents_cosinehash(directory, shingle_pickle_filename, cosinehas
     return results
 
 
-def query_all_documents_euclidhash(directory, shingle_pickle_filename, euclidhash_buckets_filename, num_hashes):
-    generate_map(shingle_pickle_filename)
-
-    with open(euclidhash_buckets_filename, 'rb') as handle:
-        euclidhash_buckets = pickle.load(handle)
-
-    results = dict()
-    for filename in os.listdir(directory):
-        
-        filepath = directory + '/' + filename
-        euclidhash = euclid_hash_single_document(filepath, num_hashes)
-        possible_sources = set()
-        
-        for i in range((num_hashes + EUCLID_BAND_SIZE - 1) // EUCLID_BAND_SIZE):
-    
-            arr = euclidhash[i * EUCLID_BAND_SIZE:(i + 1) * EUCLID_BAND_SIZE]
-            hash_value = vector_hash(arr)
-    
-            if hash_value in euclidhash_buckets[i]:
-                for source_document in euclidhash_buckets[i][hash_value]:
-                    possible_sources.add(source_document)
-        
-        # if len(possible_sources) != 0:
-        #     print(filename, sorted(possible_sources))
-        
-        results[filename] = sorted(possible_sources)
-    return results
-
 
 def query_all_documents_hamminghash(directory, shingle_pickle_filename, hamminghash_buckets_filename, num_hashes):
     generate_map(shingle_pickle_filename)
@@ -126,9 +98,6 @@ def query_all_documents(directory,shingle_pickle_filename,distance_type,num_hash
     
     if distance_type == 'Cosine':
         return query_all_documents_cosinehash(directory,shingle_pickle_filename,'cosinehash_buckets.pickle',num_hashes)
-    
-    if distance_type == 'Euclid':
-        return query_all_documents_euclidhash(directory, shingle_pickle_filename, 'euclidhash_buckets.pickle', num_hashes)
 
     if distance_type == 'Hamming':
         return query_all_documents_hamminghash(directory, shingle_pickle_filename, 'hamminghash_buckets.pickle', num_hashes)
