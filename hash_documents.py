@@ -6,7 +6,7 @@ import pickle
 NUM_HASHES = 200
 BAND_SIZE = 5
 COSINE_BAND_SIZE = 5
-EUCLID_BAND_SIZE = 5
+EUCLID_BAND_SIZE = 3
 
 shingle_dict = dict()
 

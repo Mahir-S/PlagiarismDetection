@@ -10,6 +10,7 @@ def query_all_documents_minhash(directory,shingle_pickle_filename,minhash_bucket
     with open(minhash_buckets_filename, 'rb') as handle:
         minhash_buckets = pickle.load(handle)
 
+    results = dict()
     for filename in os.listdir(directory):
         filepath = directory + '/' + filename
         minhash = minhash_document(filepath, num_hashes)
@@ -20,15 +21,20 @@ def query_all_documents_minhash(directory,shingle_pickle_filename,minhash_bucket
             if hash_value in minhash_buckets[i]:
                 for source_document in minhash_buckets[i][hash_value]:
                     possible_sources.add(source_document)
-        if len(possible_sources) != 0:
-            print(filename, sorted(possible_sources))
-
+    
+        # if len(possible_sources) != 0:
+        #     print(filename, sorted(possible_sources))
+      
+        results[filename] = sorted(possible_sources)
+    
+    return results
 
 def query_all_documents_cosinehash(directory, shingle_pickle_filename, cosinehash_buckets_filename, num_hashes):
     generate_map(shingle_pickle_filename)
     with open(cosinehash_buckets_filename, 'rb') as handle:
         cosinehash_buckets = pickle.load(handle)
 
+    results = dict()
     for filename in os.listdir(directory):
         filepath = directory + '/' + filename
         cosinehash = cosine_hash_single_document(filepath, num_hashes)
@@ -49,8 +55,11 @@ def query_all_documents_cosinehash(directory, shingle_pickle_filename, cosinehas
             for source_document,frequency in possible_sources.items():
                 if frequency > COSINE_HASH_THRESHOLD: #change if threshold becomes dynamic
                     ans.append(source_document)
-        if(len(ans) != 0):
-            print(filename, sorted(ans))
+        # if(len(ans) != 0):
+        #     print(filename, sorted(ans))
+      
+        results[filename] = sorted(ans)
+    return results
 
 
 def query_all_documents_euclidhash(directory, shingle_pickle_filename, euclidhash_buckets_filename, num_hashes):
@@ -59,6 +68,7 @@ def query_all_documents_euclidhash(directory, shingle_pickle_filename, euclidhas
     with open(euclidhash_buckets_filename, 'rb') as handle:
         euclidhash_buckets = pickle.load(handle)
 
+    results = dict()
     for filename in os.listdir(directory):
         
         filepath = directory + '/' + filename
@@ -70,24 +80,27 @@ def query_all_documents_euclidhash(directory, shingle_pickle_filename, euclidhas
             arr = euclidhash[i * EUCLID_BAND_SIZE:(i + 1) * EUCLID_BAND_SIZE]
             hash_value = vector_hash(arr)
     
-            if hash_value in minhash_buckets[i]:
-                for source_document in minhash_buckets[i][hash_value]:
+            if hash_value in euclidhash_buckets[i]:
+                for source_document in euclidhash_buckets[i][hash_value]:
                     possible_sources.add(source_document)
         
-        if len(possible_sources) != 0:
-            print(filename, sorted(possible_sources))
+        # if len(possible_sources) != 0:
+        #     print(filename, sorted(possible_sources))
+        
+        results[filename] = sorted(possible_sources)
+    return results
 
-def query_all_documents(directory,shingle_pickle_filename,num_hashes,distance_type):
+def query_all_documents(directory,shingle_pickle_filename,distance_type,num_hashes = NUM_HASHES):
     
     if distance_type == 'Jaccard':
-        query_all_documents_minhash(directory,shingle_pickle_filename,'minhash_buckets.pickle',num_hashes)
+        return query_all_documents_minhash(directory,shingle_pickle_filename,'minhash_buckets.pickle',num_hashes)
     
     if distance_type == 'Cosine':
-        query_all_documents_cosinehash(directory,shingle_pickle_filename,'cosinehash_buckets.pickle',num_hashes)
+        return query_all_documents_cosinehash(directory,shingle_pickle_filename,'cosinehash_buckets.pickle',num_hashes)
     
-    if distance_type == 'Euclidean':
-        pass
+    if distance_type == 'Euclid':
+        return query_all_documents_euclidhash(directory, shingle_pickle_filename, 'euclidhash_buckets.pickle', num_hashes)
 
 
 
-query_all_documents('corpus-20090418', 'shingles.pickle',NUM_HASHES,'Cosine')
+# query_all_documents('corpus-20090418', 'shingles.pickle','Cosine')
